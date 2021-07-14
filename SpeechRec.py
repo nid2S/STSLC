@@ -3,7 +3,7 @@ import wave
 import pyaudio
 import os
 
-def record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
+def __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, frames_per_buffer=CHUNK)
     frames = []
@@ -30,16 +30,15 @@ def STT(record_sec: int,
         CHUNK=1024,
         RATE=44100):
     output_file_name = os.path.abspath("audio/" + output_file_name)
-    record(record_sec)
 
-    record(record_sec, FORMAT, CHANNELS, CHUNK, RATE)
+    __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE)
     recognizer = sr.Recognizer()
     with sr.AudioFile(output_file_name) as source:
         audio = recognizer.record(source)
     try:
-        txt = recognizer.recognize_google(audio_data=audio, language='en-UR')
+        txt = recognizer.recognize_google(audio_data=audio, language='ko-KR')
     except sr.UnknownValueError:
-        print("언어(영어)가 인지되지 않았습니다")
+        print("언어가 인지되지 않았습니다")
         return None
     print("인지된 문자 : " + txt)
 
