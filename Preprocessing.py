@@ -1,3 +1,4 @@
+import re
 import selenium.webdriver
 from urllib.request import urlretrieve
 from urllib.error import URLError
@@ -39,7 +40,15 @@ def get_ksl_data():
     f.close()
 
 
-def eng_preprocessing(sent):
-    pass
-
-
+def eng_preprocessing(sent: str):
+    # lowcase, remove Abbreviated
+    sent = re.sub("n't", " not", sent.lower())
+    sent = re.sub("in'", "ing", sent)
+    sent = re.sub("(he|she|is)('s)", "\1 is", sent)
+    sent = re.sub("'s", " have", sent)
+    sent = re.sub("s'", "s have", sent)
+    sent = re.sub("'m", " am", sent)
+    sent = re.sub("'re", " are", sent)
+    # split word, divide char level
+    result_sent = [char for word in sent.split() for char in word]
+    return result_sent
