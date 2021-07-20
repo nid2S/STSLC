@@ -1,30 +1,33 @@
-import time
 import selenium.webdriver
-from selenium.common.exceptions import ElementNotInteractableException
 from urllib.request import urlretrieve
+from selenium.common.exceptions import ElementNotInteractableException, UnexpectedAlertPresentException
+# dataset resource : https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE
 
-driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
-driver.get('https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE')  # dataset resource
+def get_ksl_data():
+    driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
+    driver.get('https://sldict.korean.go.kr/front/sign/signContentsView.do?current_pos_index=0&origin_no=10127&searchWay=&top_category=CTE&category=&detailCategory=&searchKeyword=&pageIndex=1&pageJumpIndex=')
+    f = open("./dataset/ksl_data/words.txt", "w+", encoding="UTF-8")
+    count = 0
+    while True:
+        try:
+            # get sighLanguage video scr
+            video_element = driver.find_element_by_xpath('//div[@class="view_content clear2"]/div[@class="fl"]/div[@class="tumb_b"]/a[@*]/video[@*]/source[@type="video/mp4"]')
+            video_src = video_element.get_attribute("src")
+            # get korean
+            korean_element = driver.find_element_by_xpath('//div[@class="main_contents"]/form[@id="signViewForm"]/dl[@class="content_view_dis"]/dd')
+            word = korean_element.text
+            # save video, korean
+            f.write(str(count)+"\t"+word+"\n")
+            urlretrieve(video_src, "./dataset/ksl_data/"+str(count)+".mp4")
+            count += 1
+            # if end the list, break (or direct stop)
+            try:
+                driver.find_element_by_xpath('//div[@class="btn_set mt_30"]/a[@path="/images/tooltip/next.gif"]').click()
+            except ElementNotInteractableException:
+                break
+        except UnexpectedAlertPresentException:  # if error, refresh
+            driver.refresh()
+            continue
 
-f = open("./dataset/ksl_data/_words.txt", "w+")
-
-count = 0
-driver.find_element_by_class_name("hand_thumb").click()
-while True:
-    video_element = driver.find_element_by_xpath('//div[@class="view_content clear2"]/div[@class="fl"]/div[@class="tumb_b"]/a[@*]/video[@*]/source[@type="video/mp4"]')
-    video_src = video_element.get_attribute("src")
-
-    korean_element = driver.find_element_by_xpath('//div[@class="main_contents"]/form[@id="signViewForm"]/dl[@class="content_view_dis"]/dd')
-    word = korean_element.text
-
-    f.write(str(count)+"\t"+word+"\n")
-    urlretrieve(video_src, "./dataset/ksl_data/"+str(count)+".mp4")
-    count += 1
-
-    try:
-        driver.find_element_by_xpath('//div[@class="btn_set mt_30"]/a[@path="/images/tooltip/next.gif"]').click()
-    except ElementNotInteractableException:
-        break
-
-driver.close()
-f.close()
+    driver.close()
+    f.close()
