@@ -1,4 +1,5 @@
 import re
+import pandas as pd
 import selenium.webdriver
 from urllib.request import urlretrieve
 from urllib.error import URLError
@@ -41,14 +42,14 @@ def get_ksl_data():
 
 
 def eng_preprocessing(sent: str):
-    # lowcase, remove Abbreviated
-    sent = re.sub("n't", " not", sent.lower())
-    sent = re.sub("in'", "ing", sent)
-    sent = re.sub("(he|she|is)('s)", "\1 is", sent)
-    sent = re.sub("'s", " have", sent)
-    sent = re.sub("s'", "s have", sent)
-    sent = re.sub("'m", " am", sent)
-    sent = re.sub("'re", " are", sent)
+    # lowcase, remove Abbreviated & non-english(+|'|,| |)char
+    sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
+    sent = re.sub(r"s'", r"s have", sent)
+    sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
+
+    abbDict = {"n't": "not", "'m": "am", "'re": "are", "in'": "ing", "'cause": "because"}  # 's > have? is? | wanna, gonna don't divide.
+    sent_sr = pd.Series(sent.split).map(lambda row: abbDict[row] if row in abbDict else row)
+
     # split word, divide char level
-    result_sent = [char for word in sent.split() for char in word]
+    result_sent = [[char for char in word] for word in sent_sr.values]
     return result_sent
