@@ -4,6 +4,8 @@ import pandas as pd
 import selenium.webdriver
 from urllib.request import urlretrieve
 from urllib.error import URLError
+
+from selenium.common import exceptions
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 
 def get_ksl_data():
@@ -50,10 +52,16 @@ def get_isl_data():
     count = 0
     while True:
         for i in range(22):
-            time.sleep(5)  # if not loaded, raise IndexError.
-            driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]\
-                .find_element_by_xpath('./a[@class="tooltip"]').click()
-            time.sleep(2)
+            time.sleep(2)  # if not loaded, raise IndexError.
+            try:
+                driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]\
+                    .find_element_by_xpath('./a[@class="tooltip"]').click()
+            except IndexError:
+                time.sleep(5)
+                driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]\
+                    .find_element_by_xpath('./a[@class="tooltip"]').click()
+
+            time.sleep(2)  # if not loaded, raise NoSuchElementException
             try:
                 src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
             except NoSuchElementException:
@@ -72,7 +80,6 @@ def get_isl_data():
         except NoSuchElementException:
             pass  # have to stop manually
 
-get_isl_data()
 
 def eng_preprocessing(sent: str):
     # lowcase, remove Abbreviated & non-english(+|'|,| |)char
@@ -95,3 +102,5 @@ def kor_preprocessing(sent: str):
 def eng_isl_preprocessing(sent: str):
     pass
 
+
+get_isl_data()
