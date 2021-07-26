@@ -4,8 +4,6 @@ import pandas as pd
 import selenium.webdriver
 from urllib.request import urlretrieve
 from urllib.error import URLError
-
-from selenium.common import exceptions
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 
 def get_ksl_data():
@@ -13,7 +11,7 @@ def get_ksl_data():
     # word_len : 3847+1 (except duplicate : 3818)
     driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
     driver.get('https://sldict.korean.go.kr/front/sign/signContentsView.do?current_pos_index=0&origin_no=10127&searchWay=&top_category=CTE&category=&detailCategory=&searchKeyword=&pageIndex=1&pageJumpIndex=')
-    f = open("./dataset/ksl_data/words.txt", "a+", encoding="UTF-8")  # for unexpected finished, file type is a (have to change count)
+    f = open("./dataset/ksl_data/words.txt", "w+", encoding="UTF-8")
     count = 0
     while True:
         try:
@@ -27,6 +25,7 @@ def get_ksl_data():
             try:
                 urlretrieve(video_src, "./dataset/ksl_data/"+str(count)+".mp4")
                 f.write(str(count)+"\t"+word+"\n")
+                print(str(count)+"\t"+word)
             except URLError:
                 driver.refresh()
                 continue
@@ -48,40 +47,49 @@ def get_isl_data():
     # dataset resource : http://www.sematos.eu/isl.html
     driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
     driver.get("http://www.sematos.eu/isl.html")
-    f = open("./dataset/isl_data/word.txt", "w+")
+    f = open("./dataset/isl_data/words.txt", "w+", encoding="UTF-8")
     count = 0
+    page = 0
     while True:
         for i in range(22):
-            time.sleep(2)  # if not loaded, raise IndexError.
+            for _ in range(page):  # when using back(), return to first page | Nothing changes when the page is over, so have to stop manually.
+                time.sleep(2)
+                try:
+                    driver.find_element_by_xpath('//div[@id="dico_mots"]/div/img[@class="rightt"]').click()
+                except NoSuchElementException:
+                    time.sleep(5)
+                    driver.find_element_by_xpath('//div[@id="dico_mots"]/div/img[@class="rightt"]').click()
+
+            time.sleep(2)  # if not loaded, raised IndexError.
             try:
-                driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]\
-                    .find_element_by_xpath('./a[@class="tooltip"]').click()
+                li_element = driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]
+                word = li_element.find_element_by_xpath('./a[@class="tooltip"]').text
+                li_element.find_element_by_xpath('./a[@class="tooltip"]').click()
             except IndexError:
                 time.sleep(5)
-                driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]\
-                    .find_element_by_xpath('./a[@class="tooltip"]').click()
+                li_element = driver.find_elements_by_xpath('//div[@id="dico_mots"]/div/ul/li')[i]
+                word = li_element.find_element_by_xpath('./a[@class="tooltip"]').text
+                li_element.find_element_by_xpath('./a[@class="tooltip"]').click()
 
-            time.sleep(2)  # if not loaded, raise NoSuchElementException
+            time.sleep(2)  # if not loaded, raised NoSuchElementException
             try:
                 src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
             except NoSuchElementException:
                 time.sleep(2)
                 src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
-            word = re.sub(r"\(\w+\)", "", driver.find_element_by_xpath('//div[@id="centre"]/h2[@id="titremot"]').text).strip()
 
             urlretrieve(src, "./dataset/isl_data/"+str(count)+".mp4")
             f.write(str(count)+"\t"+word+"\n")
+            print(str(count)+"\t"+word)
             count += 1
 
             driver.back()
 
-        try:
-            driver.find_element_by_xpath('//div[@id="dico_mots"]/div/img[@class="rightt"]').click()
-        except NoSuchElementException:
-            pass  # have to stop manually
+        page += 1
 
 
 def eng_preprocessing(sent: str):
+    # ASL will be used char-level translate(of course word-level ASL exist, but we don't use).
     # lowcase, remove Abbreviated & non-english(+|'|,| |)char
     sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
     sent = re.sub(r"s'", r"s have", sent)
