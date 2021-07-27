@@ -51,8 +51,10 @@ def get_isl_data():
     count = 0
     page = 0
     while True:
+        if count > 440:  # word len(according site)
+            break
         for i in range(22):
-            for _ in range(page):  # when using back(), return to first page | Nothing changes when the page is over, so have to stop manually.
+            for _ in range(page):  # when using back(), return to first page | Nothing changes when the page is over, so coundition is word len.
                 time.sleep(2)
                 try:
                     driver.find_element_by_xpath('//div[@id="dico_mots"]/div/img[@class="rightt"]').click()
@@ -75,8 +77,12 @@ def get_isl_data():
             try:
                 src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
             except NoSuchElementException:
-                time.sleep(2)
-                src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
+                time.sleep(5)
+                try:
+                    src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
+                except NoSuchElementException:  # if raise same error, regard data to don't exist, continue.
+                    driver.back()
+                    continue
 
             urlretrieve(src, "./dataset/isl_data/"+str(count)+".mp4")
             f.write(str(count)+"\t"+word+"\n")
@@ -90,7 +96,7 @@ def get_isl_data():
 
 def eng_preprocessing(sent: str):
     # ASL will be used char-level translate(of course word-level ASL exist, but we don't use).
-    # lowcase, remove Abbreviated & non-english(+|'|,| |)char
+    # lowcase, remove Abbreviated & non-(english+|'|,| |)char
     sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
     sent = re.sub(r"s'", r"s have", sent)
     sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
