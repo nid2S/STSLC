@@ -81,6 +81,7 @@ def get_isl_data():
                 try:
                     src = driver.find_element_by_xpath('//div[@id="centre"]/div[@id="playermot"]/div/video/source[@type="video/mp4"]').get_attribute("src")
                 except NoSuchElementException:  # if raise same error, regard data to don't exist, continue.
+                    print("NoVideo\t"+word)
                     driver.back()
                     continue
 
@@ -117,4 +118,3 @@ def eng_isl_preprocessing(sent: str):
     pass
 
 
-get_isl_data()
