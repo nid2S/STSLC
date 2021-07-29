@@ -5,6 +5,8 @@ import selenium.webdriver
 from urllib.request import urlretrieve
 from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
+from nltk import sent_tokenize
+import konlpy
 
 def get_ksl_data():
     # dataset resource : https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE
@@ -95,18 +97,20 @@ def get_isl_data():
         page += 1
 
 
-def eng_preprocessing(sent: str):
+def eng_preprocessing(text: str):
     # ASL will be used char-level translate(of course word-level ASL exist, but we don't use).
     # lowcase, remove Abbreviated & non-(english+|'|,| |)char
-    sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
-    sent = re.sub(r"s'", r"s have", sent)
-    sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
+    result_sent = []
+    for sent in sent_tokenize(text):
+        sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
+        sent = re.sub(r"s'", r"s have", sent)
+        sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
 
-    abbDict = {"n't": "not", "'m": "am", "'re": "are", "in'": "ing", "'cause": "because"}  # 's > have? is? | wanna, gonna don't divide.
-    sent_sr = pd.Series(sent.split).map(lambda row: abbDict[row] if row in abbDict else row)
+        abbDict = {"n't": "not", "'m": "am", "'re": "are", "in'": "ing", "'cause": "because"}  # 's > have? is? | wanna, gonna don't divide.
+        sent_sr = pd.Series(sent.split()).map(lambda data: abbDict[data] if data in abbDict else data)
 
-    # split word, divide char level
-    result_sent = [[char for char in word] for word in sent_sr.values]
+        # split word, divide char level
+        result_sent.append([[char for char in word] for word in sent_sr.values])
     return result_sent
 
 
@@ -116,5 +120,3 @@ def kor_preprocessing(sent: str):
 
 def eng_isl_preprocessing(sent: str):
     pass
-
-
