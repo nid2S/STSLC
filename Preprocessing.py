@@ -6,6 +6,7 @@ from urllib.request import urlretrieve
 from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
+import _jpype
 import konlpy
 
 def get_ksl_data():
