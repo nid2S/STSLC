@@ -8,10 +8,10 @@ def conv_eng(sents: list[list[list[str]]]):
                 plt.imshow(plt.imread("./dataset/asl_data/"+char+".png"))
                 plt.show()
 
-def conv_kor(sents: list[list[list[str]]]):
+def conv_kor(sents: list[list[str]]):
     pass
 
-def conv_eng_isl(sents: list[list[list[str]]]):
+def conv_eng_isl(sents: list[list[str]]):
     pass
 
 
