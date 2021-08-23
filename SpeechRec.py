@@ -3,12 +3,13 @@ import wave
 import pyaudio
 import os
 
+
 def __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, frames_per_buffer=CHUNK)
     frames = []
     print("녹음시작")
-    for i in range(int(RATE/CHUNK*record_sec)):
+    for i in range(int(RATE / CHUNK * record_sec)):
         data = stream.read(CHUNK)
         frames.append(data)
     print("녹음종료")
@@ -23,19 +24,25 @@ def __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
         wf.writeframes(b''.join(frames))
         wf.close()
 
+
 def STT(record_sec: int,
         record_lang: str = "ko-KR",
-        output_file_name="audio/output.wav",
+        output_file_name="./audio/output.wav",
         FORMAT=pyaudio.paInt16,
         CHANNELS=1,
         CHUNK=1024,
         RATE=44100):
+    """lang - ko-KR or en-UR"""
+
     output_file_name = os.path.abspath(output_file_name)
+    if not os.path.exists(output_file_name):
+        os.mkdir(output_file_name)
 
     __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE)
     recognizer = sr.Recognizer()
     with sr.AudioFile(output_file_name) as source:
         audio = recognizer.record(source)
+
     try:
         txt = recognizer.recognize_google(audio_data=audio, language=record_lang)
     except sr.UnknownValueError:
