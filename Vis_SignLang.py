@@ -24,20 +24,20 @@ def vis_eng(sents: list[list[list[str]]]):
         win.geometry("800x450+50+50")
 
         cnt = 0
-        lab_list = []  # 리스트 사용시 마지막 요소만 생존. 
+        img_list = []
+        lab_list = []
         sent_comp = ""
         for i, word in enumerate(sent):
             for j, char in enumerate(word):
-                img = tkinter.PhotoImage(file="./dataset/asl_data/"+char+".png", master=win)
-
-                lab_list.append(tkinter.Label(win, image=img))
-                lab_list[cnt].grid(column=i, row=j)  # col, row = word order, char order
+                img_list.append(tkinter.PhotoImage(file="./dataset/asl_data/"+char+".png", master=win))
+                lab_list.append(tkinter.Label(win, image=img_list[cnt]))
+                lab_list[cnt].grid(column=j, row=i)  # col, row = char order, word order
                 cnt += 1
 
                 sent_comp += char
             sent_comp += " "
 
-        # win.title(sent_comp)
+        win.title(sent_comp)
         win.mainloop()
 
 
