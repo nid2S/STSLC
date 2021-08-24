@@ -103,7 +103,7 @@ def eng_preprocessing(text: str):
     # lowcase, remove Abbreviated & non-(english+|'|,| |)char
     result_sent = []
     for sent in sent_tokenize(text):
-        sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
+        sent = re.sub(r"[^a-z0-9' ?!]", "", sent.lower())
         sent = re.sub(r"s'", r"s have", sent)
         sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
 
