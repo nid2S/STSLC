@@ -26,7 +26,7 @@ def __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
 
 
 def STT(record_sec: int,
-        record_lang: str = "ko-KR",
+        record_lang: str,
         output_file_name="./audio/output.wav",
         FORMAT=pyaudio.paInt16,
         CHANNELS=1,

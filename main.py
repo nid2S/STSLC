@@ -1,7 +1,6 @@
 from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 import tkinter
 # 디자인
-# 라이브러리 상속을 나눠 속도 증진 필요?
 
 def switch_win(old_win: tkinter.Tk, new_win: tkinter.Tk):
     old_win.destroy()
@@ -21,31 +20,35 @@ class S2SL_Converter:
         win.option_add("*Font", "맑은고딕 20")
 
         tkinter.Label(win, text="Speech to SignLanguage", pady=10).pack(side="top")
-        tkinter.Button(win, text="eng", command=lambda: switch_win(win, self.eng_S2SL())).pack(side="bottom", pady="7")
-        tkinter.Button(win, text="kor", command=lambda: switch_win(win, self.kor_S2SL())).pack(side="bottom", pady="7")
-        tkinter.Button(win, text="isl", command=lambda: switch_win(win, self.isl_S2SL())).pack(side="bottom", pady="7")
+        tkinter.Button(win, text="eng", command=lambda: switch_win(win, self.make_S2SL_win("eng"))).pack(side="bottom", pady="7")
+        tkinter.Button(win, text="kor", command=lambda: switch_win(win, self.make_S2SL_win("kor"))).pack(side="bottom", pady="7")
+        tkinter.Button(win, text="isl", command=lambda: switch_win(win, self.make_S2SL_win("isl"))).pack(side="bottom", pady="7")
 
         return win
 
     def STSL(self, win: tkinter.Tk, ent: tkinter.Entry, lb: tkinter.Label, lang: str):
-        """lang: english(en/eng), korean(ko/kr/kor), international(int/isl/eng_isl)"""
         lang.lower()
         # get record sec
         try:
             rec_sec = int(ent.get())
         except ValueError:
+            error_text = "잘못된 입력입니다. 숫자를 넣어주세요." \
+                if lang in "ko/kr/kor/korean" else "wrong input. please put number."
             ent.delete(0, len(ent.get()))
-            ent.insert(0, "wrong input. please put number.")
+            ent.insert(0, error_text)
             return None
         # # recording
         # lb.config(text="recording... ")
-        # text = SpeechRec.STT(rec_sec)
+        # if lang in "ko/kr/kor/korean":
+        #     text = SpeechRec.STT(rec_sec, "ko-KR")
+        # else:
+        #     text = SpeechRec.STT(rec_sec, "en-UR")
         # if text is None:  # case of recorded nothing
         #     ent.delete(0, len(ent.get()))
         #     ent.insert(0, "couldn't recognize anything.")
         #     lb.config(text="set record second(int) :")
         #     return None
-        text = "hi. my name is nid. what's your name? oh, your name was nid too! nice meet you."
+        text = "안녕? 내 이름은 nid야. 네 이름은 뭐니? 아, 몰라? 그럼 어쩔수 없지. 근데 그거 좀 많이 그렇지 않지 않지 않아?"
         # check recorded text
         tkinter.Label(win, text="check the recognized text", font="맑은고딕 20").place(x=10, rely=0.3)
         ent = tkinter.Entry(win, width=50, font="맑은고딕 15")
@@ -66,32 +69,41 @@ class S2SL_Converter:
             elif lang in "int/isl/eng_isl/international":
                 text_p = Preprocessing.eng_isl_preprocessing(text)
                 Vis_SignLang.vis_eng_isl(text_p)
-            else:
-                raise ValueError("Wrong language.")
             self.make_mainWin().mainloop()
 
-    def eng_S2SL(self) -> tkinter.Tk:
+    def make_S2SL_win(self, lang: str) -> tkinter.Tk:
+        """lang: english(en/eng), korean(ko/kr/kor), international(int/isl/eng_isl)"""
+
+        if lang in "en/eng/english":
+            title = "eng S2SL"
+            lb_text = "set record second(int) :"
+            btn_text = "record"
+        elif lang in "ko/kr/kor/korean":
+            title = "kor S2SL"
+            lb_text = "녹음할 시간을 입력해주세요(초(sec), 양수) :"
+            btn_text = "녹음시작"
+        elif lang in "int/isl/eng_isl/international":
+            title = "isl S2SL"
+            lb_text = "set record second(int) :"
+            btn_text = "record"
+        else:
+            raise ValueError("Wrong language.")
+
         win = tkinter.Tk()
-        win.title("eng S2SL")
+        win.title(title)
         win.geometry("800x450+100+50")
         win.option_add("*Font", "맑은고딕 20")
 
-        lb = tkinter.Label(win, text="set record second(int) :")
+        lb = tkinter.Label(win, text=lb_text)
         ent = tkinter.Entry(win, font="맑은고딕 15", width="30")
         lb.grid(row=0, column=0, padx="10", pady="12")
         ent.grid(row=0, column=1, pady="12")
 
         tkinter.Button(win, background="red", command=lambda: switch_win(win, self.make_mainWin()),
                        text="<-").place(relx=0.92, rely=0.02)
-        tkinter.Button(win, command=lambda: self.STSL(win, ent, lb, "eng"), text="record").place(relx=0.45, rely=0.87)
+        tkinter.Button(win, command=lambda: self.STSL(win, ent, lb, lang), text=btn_text).place(relx=0.45, rely=0.87)
 
         return win
-
-    def kor_S2SL(self) -> tkinter.Tk:
-        pass
-
-    def isl_S2SL(self) -> tkinter.Tk:
-        pass
 
 
 if __name__ == '__main__':
