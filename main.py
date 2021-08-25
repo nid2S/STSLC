@@ -42,22 +42,28 @@ def STSL(win: tkinter.Tk, ent: tkinter.Entry, lb: tkinter.Label, lang: str):
     text = "hi. my name is nid. what's your name? oh, your name was nid too! nice meet you."
 
     # text확인/수정 > 완료 > 변경 | prep > 클래스화
+    tkinter.Label(win, text="check the recognized text", font="맑은고딕 20").place(x=10, rely=0.3)
+    ent = tkinter.Entry(win, width=50, font="맑은고딕 15")
+    ent.insert(0, text)
+    ent.place(x=10, rely=0.4)
+    tkinter.Button(win, text="confirm", font="맑은고딕 20", command=lambda: vis()).place(x=10, rely=0.5)
 
-    win.destroy()
-    win.quit()
-    if lang in "en/eng/english":
-        text_p = Preprocessing.eng_preprocessing(text)
-        Vis_SignLang.vis_eng(text_p)
-    elif lang in "ko/kr/kor/korean":
-        text_p = Preprocessing.kor_preprocessing(text)
-        Vis_SignLang.vis_kor(text_p)
-    elif lang in "int/isl/eng_isl/international":
-        text_p = Preprocessing.eng_isl_preprocessing(text)
-        Vis_SignLang.vis_eng_isl(text_p)
-    else:
-        raise ValueError("Wrong language.")
+    def vis():
+        win.destroy()
+        win.quit()
+        if lang in "en/eng/english":
+            text_p = Preprocessing.eng_preprocessing(text)
+            Vis_SignLang.vis_eng(text_p)
+        elif lang in "ko/kr/kor/korean":
+            text_p = Preprocessing.kor_preprocessing(text)
+            Vis_SignLang.vis_kor(text_p)
+        elif lang in "int/isl/eng_isl/international":
+            text_p = Preprocessing.eng_isl_preprocessing(text)
+            Vis_SignLang.vis_eng_isl(text_p)
+        else:
+            raise ValueError("Wrong language.")
+        make_mainWin().mainloop()
 
-    make_mainWin().mainloop()
 
 def eng_S2SL() -> tkinter.Tk:
     win = tkinter.Tk()

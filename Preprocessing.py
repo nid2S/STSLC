@@ -104,10 +104,9 @@ def eng_preprocessing(text: str):
     result_sent = []
     for sent in sent_tokenize(text):
         sent = re.sub(r"[^a-z0-9' ]", "", sent.lower())
-        sent = re.sub(r"s'", r"s have", sent)
         sent = re.sub(r"(n't|'m|'re|in'|'s)", r" \1", sent)
 
-        abbDict = {"n't": "not", "'m": "am", "'re": "are", "in'": "ing", "'cause": "because"}  # 's > have? is? | wanna, gonna don't divide.
+        abbDict = {"n't": "not", "'m": "am", "'re": "are", "in'": "ing", "'cause": "because"}  # ('s | s') are stil shorted form.
         sent_sr = pd.Series(sent.split()).map(lambda data: abbDict[data] if data in abbDict else data)
 
         # split word, divide char level

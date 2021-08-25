@@ -8,11 +8,11 @@ def __record(record_sec, output_file_name, FORMAT, CHANNELS, CHUNK, RATE):
     p = pyaudio.PyAudio()
     stream = p.open(format=FORMAT, channels=CHANNELS, rate=RATE, frames_per_buffer=CHUNK)
     frames = []
-    print("녹음시작")
+    # print("녹음시작")
     for i in range(int(RATE / CHUNK * record_sec)):
         data = stream.read(CHUNK)
         frames.append(data)
-    print("녹음종료")
+    # print("녹음종료")
     stream.stop_stream()
     stream.close()
     p.terminate()
@@ -49,6 +49,6 @@ def STT(record_sec: int,
         print("언어가 인지되지 않았습니다")
         return None
 
-    print("인지된 문자 : " + txt)
+    # print("인지된 문자 : " + txt)
 
     return txt
