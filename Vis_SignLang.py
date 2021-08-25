@@ -28,6 +28,8 @@ def vis_eng(sents: list[list[list[str]]]):
                 try:
                     img_list.append(tkinter.PhotoImage(file="./dataset/asl_data/" + char + ".png", master=win))
                 except tkinter.TclError:
+                    img_list.append(None)
+                    lab_list.append(None)
                     cnt += 1
                     continue
                 lab_list.append(tkinter.Label(win, image=img_list[cnt]))
@@ -37,7 +39,7 @@ def vis_eng(sents: list[list[list[str]]]):
                 sent_comp += char
             sent_comp += " "
 
-        tkinter.Button(win, background="black", command=lambda: win.destroy(), text="->").place(relx=0.48, rely=0.92)
+        tkinter.Button(win, command=lambda: win.destroy(), text="->").place(relx=0.48, rely=0.92)
         win.title(sent_comp)
         win.mainloop()
 
