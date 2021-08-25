@@ -10,11 +10,10 @@ def vis_eng(sents: list[list[list[str]]]):
     # tkinter
     for sent in sents:
         win = tkinter.Tk()
-
         # each picture's size is about (60*110)
         max_wordLen = max(len(word) for word in sent) + 1
         wid = max_wordLen*60 if (max_wordLen*60 > 800) else 800
-        hei = len(sent)*110 if (len(sent)*110 > 150) else 450
+        hei = len(sent)*110 if (len(sent)*110 > 450) else 450
         win.geometry(f"{wid}x{hei}+100+50")
 
         cnt = 0
@@ -22,7 +21,7 @@ def vis_eng(sents: list[list[list[str]]]):
         lab_list = []
         sent_comp = ""
         for i, word in enumerate(sent):
-            tkinter.Label(win, text=word).grid(row=i, column=0)
+            tkinter.Label(win, text=word, font="맑은고딕 13").grid(row=i, column=0, padx="5")
 
             for j, char in enumerate(word):
                 try:
@@ -39,7 +38,7 @@ def vis_eng(sents: list[list[list[str]]]):
                 sent_comp += char
             sent_comp += " "
 
-        tkinter.Button(win, command=lambda: win.destroy(), text="->").place(relx=0.48, rely=0.92)
+        tkinter.Button(win, command=lambda: win.destroy(), text="->", font="맑은고딕 20").place(relx=0.45, rely=0.87)
         win.title(sent_comp)
         win.mainloop()
 
