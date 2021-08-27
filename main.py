@@ -28,17 +28,26 @@ class S2SL_Converter:
 
     def STSL(self, win: tkinter.Tk, ent: tkinter.Entry, lb: tkinter.Label, lang: str):
         lang.lower()
+        if lang in "ko/kr/kor/korean":
+            error_text = "잘못된 입력입니다. 숫자를 넣어주세요."
+            recording_text = "녹음중..."
+            check_text = "녹음된 문장을 확인/수정해주세요."
+            confirm_text = "확인"
+        else:
+            error_text = "wrong input. please put number."
+            recording_text = "recording..."
+            check_text = "check the recognized text"
+            confirm_text = "confirm"
+
         # get record sec
         try:
             rec_sec = int(ent.get())
         except ValueError:
-            error_text = "잘못된 입력입니다. 숫자를 넣어주세요." \
-                if lang in "ko/kr/kor/korean" else "wrong input. please put number."
             ent.delete(0, len(ent.get()))
             ent.insert(0, error_text)
             return None
         # # recording
-        # lb.config(text="recording... ")
+        # lb.config(text=recording_text)
         # if lang in "ko/kr/kor/korean":
         #     text = SpeechRec.STT(rec_sec, "ko-KR")
         # else:
@@ -48,13 +57,14 @@ class S2SL_Converter:
         #     ent.insert(0, "couldn't recognize anything.")
         #     lb.config(text="set record second(int) :")
         #     return None
-        text = "안녕? 내 이름은 nid야. 네 이름은 뭐니? 아, 몰라? 그럼 어쩔수 없지. 근데 그거 좀 많이 그렇지 않지 않지 않아?"
+        text = "안녕? 내 이름은 니드야. 네 이름은 뭐니? 아, 몰라? 그럼 어쩔수 없지. 근데 그거 좀 많이 그렇지 않지 않지 않아?"
+
         # check recorded text
-        tkinter.Label(win, text="check the recognized text", font="맑은고딕 20").place(x=10, rely=0.3)
+        tkinter.Label(win, text=check_text, font="맑은고딕 20").place(x=10, rely=0.3)
         ent = tkinter.Entry(win, width=50, font="맑은고딕 15")
         ent.insert(0, text)
         ent.place(x=10, rely=0.4)
-        tkinter.Button(win, text="confirm", font="맑은고딕 20", command=lambda: vis()).place(x=10, rely=0.5)
+        tkinter.Button(win, text=confirm_text, font="맑은고딕 20", command=lambda: vis()).place(x=10, rely=0.5)
 
         # visualization function.
         def vis():
