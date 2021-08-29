@@ -2,6 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 import tkinter
 # 디자인
 
+
 def switch_win(old_win: tkinter.Tk, new_win: tkinter.Tk):
     old_win.destroy()
     old_win.quit()
