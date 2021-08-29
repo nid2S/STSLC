@@ -115,7 +115,7 @@ def eng_preprocessing(text: str):
 
 
 def kor_preprocessing(sent: str):
-    # charlevel dived > return
+    # charlevel divide > return
     
     pass
 
