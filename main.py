@@ -1,6 +1,18 @@
 from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 import tkinter
+import os
 # 디자인
+
+
+def check_data_exist():
+    if not os.path.isdir("./dataset/asl_data") and os.path.isdir("./dataset/isl_data")\
+            and os.path.isdir("./dataset/ksl_data") and os.path.isfile("./dataset/asl_data/a.png"):
+        raise FileExistsError("Essential file DO NOT exist")
+
+    if not os.path.isfile("./dataset/isl_data/words.txt"):
+        Preprocessing.get_isl_data()
+    if not os.path.isfile("./dataset/ksl_data/words.txt"):
+        Preprocessing.get_ksl_data()
 
 
 def switch_win(old_win: tkinter.Tk, new_win: tkinter.Tk):
@@ -118,4 +130,5 @@ class S2SL_Converter:
 
 
 if __name__ == '__main__':
+    check_data_exist()
     stslc = S2SL_Converter()

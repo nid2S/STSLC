@@ -6,12 +6,12 @@ from urllib.request import urlretrieve
 from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
-import _jpype
 import konlpy
+
 
 def get_ksl_data():
     # dataset resource : https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE
-    # word_len : 3847+1 (except duplicate : 3818)
+    print("----------start download----------")
     driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
     driver.get('https://sldict.korean.go.kr/front/sign/signContentsView.do?current_pos_index=0&origin_no=10127&searchWay=&top_category=CTE&category=&detailCategory=&searchKeyword=&pageIndex=1&pageJumpIndex=')
     f = open("./dataset/ksl_data/words.txt", "w+", encoding="UTF-8")
@@ -48,6 +48,7 @@ def get_ksl_data():
 
 def get_isl_data():
     # dataset resource : http://www.sematos.eu/isl.html
+    print("----------start download----------")
     driver = selenium.webdriver.Chrome("D:\\python_util\\driver\\chromedriver.exe")
     driver.get("http://www.sematos.eu/isl.html")
     f = open("./dataset/isl_data/words.txt", "w+", encoding="UTF-8")
@@ -115,8 +116,8 @@ def eng_preprocessing(text: str):
 
 
 def kor_preprocessing(sent: str):
-    # charlevel divide > return
-    
+    # 명사/동사(기본형, OKT의 어근화 사용)
+    # 동음 이의어 > 언어모델?
     pass
 
 
