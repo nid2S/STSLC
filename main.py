@@ -1,4 +1,7 @@
+import nltk
+
 from STSLC import SpeechRec, Preprocessing, Vis_SignLang
+from nltk import download, sent_tokenize
 import tkinter
 import os
 # 디자인
@@ -9,6 +12,10 @@ def check_data_exist():
             and os.path.isdir("./dataset/ksl_data") and os.path.isfile("./dataset/asl_data/a.png"):
         raise FileExistsError("Essential file DO NOT exist")
 
+    try:
+        sent_tokenize("hello, world.")
+    except LookupError:
+        download('punkt')
     if not os.path.isfile("./dataset/isl_data/words.txt"):
         Preprocessing.get_isl_data()
     if not os.path.isfile("./dataset/ksl_data/words.txt"):

@@ -115,11 +115,12 @@ def eng_preprocessing(text: str):
     return result_sent
 
 
-def kor_preprocessing(sent: str):
+def kor_preprocessing(text: str):
     # 명사/동사(기본형, OKT의 어근화 사용)
     # 동음 이의어 > 언어모델?
-    pass
+    for sent in sent_tokenize(text.lower()):
+        sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
 
 
-def eng_isl_preprocessing(sent: str):
+def eng_isl_preprocessing(text: str):
     pass
