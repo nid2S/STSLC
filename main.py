@@ -4,7 +4,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# 디자인
+# 디자인, 가상환경
 
 
 def check_data_exist():

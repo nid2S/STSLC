@@ -42,7 +42,9 @@ def vis_eng(sents: list[list[list[str]]]):
 
 
 def vis_kor(sents: list[list[str]]):
-    data = pd.read_csv("./STSLC/dataset/ksl_data/words.txt", header=None, index_col=0, names=["word"], sep="\t")
+    # sent > token
+
+    data = pd.read_csv("./STSLC/dataset/ksl_data/words.txt", header=None,  names=["file_num", "word"], sep="\t")
 
 
 def vis_eng_isl(sents: list[list[str]]):

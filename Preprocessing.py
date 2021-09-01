@@ -6,7 +6,9 @@ from urllib.request import urlretrieve
 from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
-import konlpy
+from konlpy.tag import Okt
+from soynlp.normalizer import repeat_normalize
+# after python 3.9,  pip install JPype1-py3 > modify jvm.py(delete convertStrings=True in line 64)
 
 
 def get_ksl_data():
@@ -116,10 +118,14 @@ def eng_preprocessing(text: str):
 
 
 def kor_preprocessing(text: str):
-    # 명사/동사(기본형, OKT의 어근화 사용)
-    # 동음 이의어 > 언어모델?
+    # lower, remove other char, tokenize/stemming/normalize
+    okt = Okt()
+    result_sent = []
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
+        sent = [repeat_normalize(token, 1) for token in okt.morphs(sent, stem=True)]
+        result_sent.append(sent)
+    return result_sent
 
 
 def eng_isl_preprocessing(text: str):
