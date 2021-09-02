@@ -123,7 +123,6 @@ def kor_preprocessing(text: str):
     result_sent = []
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
-        # 동음이의어 처리(stemming도 고민) | 한나눔/MeCab으로 변경도 고려 or 단어를 기반으로 RNN/S2S를 이용해 직접 모델제작
         sent = [repeat_normalize(token, 1) for token in okt.morphs(sent, stem=True)]
         result_sent.append(sent)
     return result_sent
