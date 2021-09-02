@@ -1,7 +1,6 @@
 import tkinter
 import threading
 import os
-
 import pandas as pd
 from hgtk.text import decompose
 from cv2 import VideoCapture, cvtColor, waitKey, COLOR_BGR2RGB
@@ -11,21 +10,21 @@ from PIL.ImageTk import PhotoImage
 
 def video_running(sl_type: str, sents: str, data: pd.DataFrame, win: tkinter.Tk):
     """sl_type : ksl or isl"""
-    file_nums = []
+    file_numbers = []
     for sent in sents:
         for token in sent:
             lb = tkinter.Label(win)
             lb.grid()
             try:
-                file_nums.append(data.loc[data["word"] == token].iterrows().__next__()[1]["file_num"])
+                file_numbers.append(data.loc[data["word"] == token].iterrows().__next__()[1]["file_num"])
             except StopIteration:  # case of couldn't search token
                 for char in decompose(token).replace('ᴥ', ' ').split():
-                    file_nums.append(data.loc[data["word"] == char].iterrows().__next__()[1]["file_num"])
+                    file_numbers.append(data.loc[data["word"] == char].iterrows().__next__()[1]["file_num"])
 
     lb = tkinter.Label(win)
     lb.grid()
-    for file_num in file_nums:
-        video_path = "./dataset/"+sl_type+"_data/" + str(file_num) + ".mp4"
+    for file_number in file_numbers:
+        video_path = "./dataset/"+sl_type+"_data/" + str(file_number) + ".mp4"
         if not os.path.isfile(video_path):
             raise FileNotFoundError
 
@@ -96,7 +95,7 @@ def vis_kor(sents: list[list[str]]):
 
     win = tkinter.Tk()
     win.title("Korean Speak to SighLanguage")
-    win.geometry("800x450+100+50")
+    win.geometry("800x450+100+50")  # each video's size is (700*466)
 
     t = threading.Thread(target=video_running, args=["ksl", sents, data, win])
     t.deamon = True
@@ -106,6 +105,7 @@ def vis_kor(sents: list[list[str]]):
 
 
 def vis_eng_isl(sents: list[list[str]]):
+    # each video's size is (400*300)
     pass
 
 

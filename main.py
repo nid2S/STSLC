@@ -2,7 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# TODO 디자인, 가상환경
+# 디자인, 가상환경, 영상재생/사이즈 확인
 
 
 def check_data_exist():
