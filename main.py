@@ -1,10 +1,8 @@
-import nltk
-
 from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# 디자인, 가상환경
+# TODO 디자인, 가상환경
 
 
 def check_data_exist():
@@ -32,7 +30,6 @@ class S2SL_Converter:
     def __init__(self):
         self.make_mainWin().mainloop()
 
-    # private?
     def make_mainWin(self) -> tkinter.Tk:
         win = tkinter.Tk()
         win.title("S2SL")
@@ -66,6 +63,7 @@ class S2SL_Converter:
             ent.delete(0, len(ent.get()))
             ent.insert(0, error_text)
             return None
+        # TODO 임시로 입력을 고정함
         # # recording
         # lb.config(text=recording_text)
         # if lang in "ko/kr/kor/korean":
