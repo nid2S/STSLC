@@ -15,4 +15,17 @@ def tokenize(text):
     return result_list
 
 
-
+ksl = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\ksl_data\\words.txt", sep="\t", names=["file_num", "word"])
+file_num = []
+word_origin = []
+word_encoded = []
+for i, row in ksl.iterrows():
+    for word in row["word"].split(","):
+        file_num.append(row["file_num"])
+        word_origin.append(word)
+        word_encoded.append(tokenize(word))
+df = pd.DataFrame()
+df["file_num"] = pd.Series(file_num)
+df["word_origin"] = pd.Series(word_origin)
+df["word_encoded"] = pd.Series(word_encoded)
+df.to_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\ksl_encoded_data.csv", index=False, header=False)  # header=[열이름], columns=[열이름]
