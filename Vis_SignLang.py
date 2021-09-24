@@ -1,22 +1,29 @@
 import tkinter
 import threading
-import os
+import numpy as np
 import pandas as pd
-from hgtk.text import decompose
 from cv2 import VideoCapture, cvtColor, waitKey, COLOR_BGR2RGB
 from PIL.Image import fromarray
 from PIL.ImageTk import PhotoImage
 from typing import List
+from time import sleep
 
 
 def get_most_similar(word: List[float], sl_type: str) -> str:
-    if sl_type == "ksl":
-        data = pd.read_csv("D:\workspace\Git_project\STSLC\dataset\ksl_encoded_data.csv", names=["file_num", "word_origin", "word_encoded"])
-    else:
-        exit(1)
-    pass
+    data = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\"+sl_type+"_encoded_data.csv", names=["file_num", "word_origin", "word_encoded"])
 
-    return str(0)
+    def get_cos_similar(v1: List[float], v2: List[float]) -> float:
+        return np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
+
+    file_num = -1
+    most_similarity = 0.7  # least similarity is 0.7.
+    for idx, row in data.iterrows():
+        temp_sim = get_cos_similar(word, row["word_encoded"])
+        if temp_sim > most_similarity:
+            most_similarity = temp_sim
+            file_num = row["file_num"]
+
+    return str(file_num)
 
 def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk):
     """sl_type : ksl or isl"""
@@ -28,10 +35,13 @@ def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk)
     lb = tkinter.Label(win)
     lb.grid()
     for file_number in file_numbers:
-        video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
-        if not os.path.isfile(video_path):
-            raise FileNotFoundError
+        if file_number == "-1":  # No more than 0.7 similarity.
+            lb.configure(text="OOV", image=None)
+            # TODO 숫자/영어등의 경우일때 생각
+            sleep(0.5)
+            continue
 
+        video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
         cap = VideoCapture(video_path)
         while True:
             ret, frame = cap.read()
