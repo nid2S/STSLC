@@ -6,25 +6,29 @@ from hgtk.text import decompose
 from cv2 import VideoCapture, cvtColor, waitKey, COLOR_BGR2RGB
 from PIL.Image import fromarray
 from PIL.ImageTk import PhotoImage
+from typing import List
 
 
-def video_running(sl_type: str, sents: str, data: pd.DataFrame, win: tkinter.Tk):
+def get_most_similar(word: List[float], sl_type: str) -> str:
+    if sl_type == "ksl":
+        data = pd.read_csv("D:\workspace\Git_project\STSLC\dataset\ksl_encoded_data.csv", names=["file_num", "word_origin", "word_encoded"])
+    else:
+        exit(1)
+    pass
+
+    return str(0)
+
+def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk):
     """sl_type : ksl or isl"""
     file_numbers = []
     for sent in sents:
-        for token in sent:
-            lb = tkinter.Label(win)
-            lb.grid()
-            try:
-                file_numbers.append(data.loc[data["word"] == token].iterrows().__next__()[1]["file_num"])
-            except StopIteration:  # case of couldn't search token
-                for char in decompose(token).replace('ᴥ', ' ').split():
-                    file_numbers.append(data.loc[data["word"] == char].iterrows().__next__()[1]["file_num"])
+        for word in sent:
+            file_numbers.append(get_most_similar(word, sl_type))
 
     lb = tkinter.Label(win)
     lb.grid()
     for file_number in file_numbers:
-        video_path = "./dataset/"+sl_type+"_data/" + str(file_number) + ".mp4"
+        video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
         if not os.path.isfile(video_path):
             raise FileNotFoundError
 
@@ -37,12 +41,11 @@ def video_running(sl_type: str, sents: str, data: pd.DataFrame, win: tkinter.Tk)
             image = PhotoImage(fromarray(frame))
             lb.image = image
             lb.configure(image=image)
-            waitKey(1)
-
+            waitKey(1)  # 1frame == 1ms
     win.destroy()
 
 
-def vis_eng(sents: list[list[list[str]]]):
+def vis_eng(sents: List[List[List[str]]]):
     # sent > word > char
 
     # tkinter
@@ -81,30 +84,20 @@ def vis_eng(sents: list[list[list[str]]]):
         win.mainloop()
 
 
-def vis_kor(sents: list[list[str]]):
-    # sent > token
-
-    data = pd.read_csv("./STSLC/dataset/ksl_data/words.txt", header=None, names=["file_num", "word"], sep="\t")
-    add_words = []
-    for idx, (file_num, word) in data.copy().iterrows():
-        if "," in word:
-            for each_word in word.split(","):
-                add_words.append([file_num, each_word])
-            data.drop(idx, inplace=True)
-    data = data.append(pd.DataFrame(add_words, columns=["file_num", "word"]), ignore_index=True)
-
+def vis_kor(sents: List[List[List[float]]]):
+    # sents > sent > word(token_vec)
     win = tkinter.Tk()
     win.title("Korean Speak to SighLanguage")
     win.geometry("800x450+100+50")  # each video's size is (700*466)
 
-    t = threading.Thread(target=video_running, args=["ksl", sents, data, win])
+    t = threading.Thread(target=video_running, args=["ksl", sents, win])
     t.deamon = True
     t.start()
 
     win.mainloop()
 
 
-def vis_eng_isl(sents: list[list[str]]):
+def vis_eng_isl(sents: List[List[List[float]]]):
     # each video's size is (400*300)
     pass
 
