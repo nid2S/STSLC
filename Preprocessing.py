@@ -6,10 +6,27 @@ from urllib.request import urlretrieve
 from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
-from konlpy.tag import Okt
-from soynlp.normalizer import repeat_normalize
-# after python 3.9,  pip install JPype1-py3 > modify jvm.py(delete convertStrings=True in line 64)
+from gensim.models import Word2Vec
+from typing import List
+import MeCab
 
+
+def tokenize(word: str) -> List[float]:
+    # vocab text 전처리
+    word = re.sub("(-었)|(편지 등을)|(꽃이)|(해가)|(鬼神)", "", word)
+    word = re.sub("\W", "", word)
+    # 문장 토큰화
+    t = MeCab.Tagger()
+    result_list = []
+    # TODO 단어별로 임베딩 벡터화 | 거대 vocab을 가져와 mecab으로 토큰화, gensim/GloVe를 사용해 모델 생성/저장 후 사용
+    for line in t.parse(word).split("\n"):
+        w = line.split("\t")[0]
+        if w in ["", "EOS"]:
+            continue
+        # w를 벡터화
+        result_list.append(w)
+    # result_list의 벡터들을 평균냄
+    return result_list
 
 def get_ksl_data():
     # dataset resource : https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE
@@ -46,7 +63,6 @@ def get_ksl_data():
 
     driver.close()
     f.close()
-
 
 def get_isl_data():
     # dataset resource : http://www.sematos.eu/isl.html
@@ -116,17 +132,18 @@ def eng_preprocessing(text: str):
         result_sent.append([[char for char in word] for word in sent_sr.values])
     return result_sent
 
-
-def kor_preprocessing(text: str):
+def kor_preprocessing(text: str) -> List[List[List[float]]]:
+    # sents > sent > word(token_vec)
     # lower, remove other char, tokenize/stemming/normalize
-    okt = Okt()
     result_sent = []
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
-        sent = [repeat_normalize(token, 1) for token in okt.morphs(sent, stem=True)]
-        result_sent.append(sent)
+        result_word = []
+        for word in sent.split():
+            res = tokenize(word)
+            result_word.append(res)
+        result_sent.append(result_word)
     return result_sent
-
 
 def eng_isl_preprocessing(text: str):
     pass
