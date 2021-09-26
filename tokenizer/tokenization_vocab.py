@@ -20,4 +20,6 @@ def get_ksl():
     df["word_encoded"] = pd.Series(word_encoded)
     df.to_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\ksl_encoded_data.csv", index=False, columns=["file_num", "word_origin", "word_encoded"])
 
+def get_isl():
+    pass
 
