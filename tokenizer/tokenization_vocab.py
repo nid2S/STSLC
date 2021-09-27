@@ -13,8 +13,7 @@ def get_ksl():
         for word in row["word"].split(","):
             file_num.append(row["file_num"])
             word_origin.append(word)
-            word_encoded.append(t.tokenize(word))
-            print("======== "+str(i)+" =========")
+            word_encoded.append(t.tokenize_kor(word))
     # save to csv with DataFrame
     df = pd.DataFrame()
     df["file_num"] = pd.Series(file_num)
@@ -25,4 +24,3 @@ def get_ksl():
 def get_isl():
     pass
 
-get_ksl()

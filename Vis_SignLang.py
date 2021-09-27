@@ -17,6 +17,8 @@ def get_most_similar(word: List[float], sl_type: str) -> str:
 
     file_num = -1
     most_similarity = 0.7  # least similarity is 0.7.
+    if sum(np.asarray(word) != 0) == 0:  # case of input is OOV
+        return "-1"
     for idx, row in data.iterrows():
         temp_sim = get_cos_similar(word, row["word_encoded"])
         if temp_sim > most_similarity:
