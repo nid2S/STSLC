@@ -8,7 +8,6 @@ from urllib.error import URLError
 from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
 from typing import List
-import MeCab
 
 class tokenizer:
     def __init__(self):
@@ -21,21 +20,14 @@ class tokenizer:
         # preprocessing file(SL video)'s word
         word = re.sub("(-었)|(편지 등을)|(꽃이)|(해가)|(鬼神)", "", word)
         word = re.sub("\W", "", word)
-        # sent tokenization
-        t = MeCab.Tagger()
-        result_list = []
         # get token
-        for line in t.parse(word).split("\n"):
-            w = line.split("\t")[0]
-            if w in ["", "EOS", "는", "이", "가", "에게", "을", "를"]:
+        result_list = []
+        for char in word:
+            if char in ["", "는", "이", "가", "에게", "을", "를"] or char not in self.d:  # passing stopword, OOV
                 continue
-            if w in ["은", "다"] and len(result_list) > 1:  # "은", "다" have another meaning, so removed only not first.
+            if char in ["은", "다"] and len(result_list) > 1:  # "은", "다" have another meaning, so removed only not first.
                 continue
-            for char in w:  # devide to char-level (vector is char-level)
-                try:
-                    result_list.append(self.d[char])
-                except KeyError:
-                    continue
+            result_list.append(self.d[char])
         # get vectors' mean
         if len(result_list) == 0:  # case of OOV
             return [0.]*self.embedding_size
@@ -147,15 +139,17 @@ def eng_preprocessing(text: str):
         result_sent.append([[char for char in word] for word in sent_sr.values])
     return result_sent
 
-def kor_preprocessing(text: str) -> List[List[List[float]]]:
+def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[List[str]]]):
     # sents > sent > word(token_vec)
     # lower, remove other char, tokenize/stemming/normalize
     result_sent = []
+    sents = []
     t = tokenizer()
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
         result_sent.append([t.tokenize_kor(word) for word in sent.split()])
-    return result_sent
+        sents.append([word for word in sent.split()])
+    return result_sent, sents
 
 def eng_isl_preprocessing(text: str):
     pass

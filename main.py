@@ -2,7 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# TODO 영상재생/사이즈 확인 | make ISL | 음성인식 확인
+# TODO 영상재생/사이즈 확인 | make ISL | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가)
 
 
 def check_data_exist():
@@ -125,7 +125,7 @@ class S2SL_Converter:
         lb = tkinter.Label(win, text=lb_text)
         ent = tkinter.Entry(win, font="맑은고딕 15", width="30")
         lb.grid(row=0, column=0, padx="10", pady="12")
-        ent.grid(row=0, column=1, pady="12")
+        ent.grid(row=1, column=0, pady="12")
 
         tkinter.Button(win, background="red", command=lambda: switch_win(win, self.make_mainWin()),
                        text="<-").place(relx=0.92, rely=0.02)

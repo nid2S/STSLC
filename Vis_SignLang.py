@@ -9,38 +9,51 @@ from typing import List
 from time import sleep
 
 
-def get_most_similar(word: List[float], sl_type: str) -> str:
-    data = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\"+sl_type+"_encoded_data.csv", names=["file_num", "word_origin", "word_encoded"])
+def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
+    # TODO ISL
+    # get data
+    data = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\"+sl_type+"_encoded_data.csv")
 
-    def get_cos_similar(v1: List[float], v2: List[float]) -> float:
-        return np.dot(v1, v2)/(np.linalg.norm(v1)*np.linalg.norm(v2))
+    # change type of data/word
+    data["word_encoded"] = data["word_encoded"].map(lambda w: np.asarray(w.strip("[]").split(","), dtype=np.float32))
+    word = np.asarray(word, dtype=np.float32)
 
-    file_num = -1
-    most_similarity = 0.7  # least similarity is 0.7.
-    if sum(np.asarray(word) != 0) == 0:  # case of input is OOV
+    # if word is OOV, return -1
+    if sum(word != 0) == 0:
         return "-1"
-    for idx, row in data.iterrows():
-        temp_sim = get_cos_similar(word, row["word_encoded"])
-        if temp_sim > most_similarity:
-            most_similarity = temp_sim
-            file_num = row["file_num"]
 
+    # get cosine similarity
+    data["similarity"] = data["word_encoded"].map(lambda word_vec: np.dot(word, word_vec)/(np.linalg.norm(word)*np.linalg.norm(word_vec)))
+
+    # get max similarity's file_num. if max similarity is lower than 0.7, file_num is -1.
+    file_num = data[data["similarity"] == max(data["similarity"])] if max(data["similarity"]) > 0.7 else -1
+    try:
+        file_num = file_num["file_num"].item()
+    except ValueError:  # case of max similarity is exist more than two.
+        for idx, row in file_num.iterrows():  # this case means several chars were repeating like "내"/"내내".
+            if len(word_origin) == len(row["word_origin"].item()):  # so same length, same word.
+                file_num = file_num[idx]["file_num"].item()
+        if not isinstance(file_num, int):  # if word of same length do NOT exsit, one of most close is file_num.
+            file_num["len_gap"] = file_num["word_origin"].map(lambda word_r: len(word_origin)-len(word_r))
+            file_num = file_num[file_num["len_gap"] == max(file_num["len_gap"])]["file_num"].item()
+
+    print("get one file_num : " + str(file_num))
     return str(file_num)
 
-def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk):
+def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[List[str]]]), win: tkinter.Tk):
     """sl_type : ksl or isl"""
     # get file numbers
     file_numbers = []
-    for sent in sents:
-        for word in sent:
-            file_numbers.append(get_most_similar(word, sl_type))
+    for sent, sent_origin in zip(sents[0], sents[1]):
+        for word, word_origin in zip(sent, sent_origin):
+            file_numbers.append(get_most_similar(word, word_origin, sl_type))
     # playing video
     lb = tkinter.Label(win)
     lb.grid()
     for file_number in file_numbers:
         if file_number == "-1":  # No more than 0.7 similarity.
             lb.configure(text="OOV", image=None)
-            # TODO 숫자/영어등의 경우일때 생각
+            # TODO 영어일 경우
             sleep(0.5)
             continue
 
@@ -54,7 +67,8 @@ def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk)
             image = PhotoImage(fromarray(frame))
             lb.image = image
             lb.configure(image=image)
-            waitKey(1)  # 1frame == 1ms
+            # TODO 깜빡임
+            waitKey(2)  # 1frame == 1ms
     win.destroy()
 
 
@@ -97,7 +111,7 @@ def vis_eng(sents: List[List[List[str]]]):
         win.mainloop()
 
 
-def vis_kor(sents: List[List[List[float]]]):
+def vis_kor(sents: (List[List[List[float]]], List[List[List[str]]])):
     # sents > sent > word(token_vec)
     win = tkinter.Tk()
     win.title("Korean Speak to SighLanguage")
