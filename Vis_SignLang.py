@@ -27,11 +27,12 @@ def get_most_similar(word: List[float], sl_type: str) -> str:
 
 def video_running(sl_type: str, sents: List[List[List[float]]], win: tkinter.Tk):
     """sl_type : ksl or isl"""
+    # get file numbers
     file_numbers = []
     for sent in sents:
         for word in sent:
             file_numbers.append(get_most_similar(word, sl_type))
-
+    # playing video
     lb = tkinter.Label(win)
     lb.grid()
     for file_number in file_numbers:

@@ -1,5 +1,6 @@
 import re
 import time
+import numpy as np
 import pandas as pd
 import selenium.webdriver
 from urllib.request import urlretrieve
@@ -9,29 +10,38 @@ from nltk import sent_tokenize
 from typing import List
 import MeCab
 
+class tokenizer:
+    def __init__(self):
+        self.embedding_size = 200
+        # get/make wordVocab
+        with open("D:\\workspace\\Git_project\\STSLC\\tokenizer\\ko.vec", "r+", encoding="utf-8") as f:
+            self.d = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
 
-def tokenize(word: str) -> List[float]:
-    # get wordVocab
-    with open("D:\\workspace\\Git_project\\STSLC\\tokenizer\\ko.vec", "r+", encoding="utf-8") as f:
-        d = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
-    # preprocessing file(SL video)'s word
-    word = re.sub("(-었)|(편지 등을)|(꽃이)|(해가)|(鬼神)", "", word)
-    word = re.sub("\W", "", word)
-    # sent tokenization
-    t = MeCab.Tagger()
-    result_list = []
-    # get token
-    for line in t.parse(word).split("\n"):
-        w = line.split("\t")[0]
-        if w in ["", "EOS", "은", "는", "이", "가", "에게", "을", "를", "다"]:
-            continue
-        for char in w:
-            try:
-                result_list.append(d[char])
-            except KeyError:
+    def tokenize(self, word: str) -> List[float]:
+        # preprocessing file(SL video)'s word
+        word = re.sub("(-었)|(편지 등을)|(꽃이)|(해가)|(鬼神)", "", word)
+        word = re.sub("\W", "", word)
+        # sent tokenization
+        t = MeCab.Tagger()
+        result_list = []
+        # get token
+        for line in t.parse(word).split("\n"):
+            w = line.split("\t")[0]
+            if w in ["", "EOS", "는", "이", "가", "에게", "을", "를"]:
                 continue
-    # TODO get vector's mean
-    return result_list
+            if w in ["은", "다"] and len(result_list) > 1:  # "은", "다" have another meaning, so removed only not alone.
+                continue
+            for char in w:  # devide to char-level (vector is char-level)
+                try:
+                    result_list.append(self.d[char])
+                except KeyError:
+                    continue
+        # get vectors' mean
+        if len(result_list) == 0:  # case of OOV
+            return [0.]*self.embedding_size
+        else:
+            result_list = sum(np.asarray(result_list, dtype=np.float32)) / len(result_list)
+            return result_list.tolist()
 
 def get_ksl_data():
     # dataset resource : https://sldict.korean.go.kr/front/sign/signList.do?top_category=CTE
@@ -141,9 +151,10 @@ def kor_preprocessing(text: str) -> List[List[List[float]]]:
     # sents > sent > word(token_vec)
     # lower, remove other char, tokenize/stemming/normalize
     result_sent = []
+    t = tokenizer()
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
-        result_sent.append([tokenize(word) for word in sent.split()])
+        result_sent.append([t.tokenize(word) for word in sent.split()])
     return result_sent
 
 def eng_isl_preprocessing(text: str):

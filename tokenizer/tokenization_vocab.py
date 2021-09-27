@@ -1,9 +1,10 @@
-from STSLC.Preprocessing import tokenize
+from STSLC.Preprocessing import tokenizer
 import pandas as pd
 
 def get_ksl():
     # make csv_file
     ksl = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\ksl_data\\words.txt", sep="\t", names=["file_num", "word"])
+    t = tokenizer()
     file_num = []
     word_origin = []
     word_encoded = []
@@ -12,7 +13,8 @@ def get_ksl():
         for word in row["word"].split(","):
             file_num.append(row["file_num"])
             word_origin.append(word)
-            word_encoded.append(tokenize(word))
+            word_encoded.append(t.tokenize(word))
+            print("======== "+str(i)+" =========")
     # save to csv with DataFrame
     df = pd.DataFrame()
     df["file_num"] = pd.Series(file_num)
@@ -23,3 +25,4 @@ def get_ksl():
 def get_isl():
     pass
 
+get_ksl()
