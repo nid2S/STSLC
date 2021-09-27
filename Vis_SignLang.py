@@ -30,10 +30,9 @@ def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
     try:
         file_num = file_num["file_num"].item()
     except ValueError:  # case of max similarity is exist more than two.
-        for idx, row in file_num.iterrows():  # this case means several chars were repeating like "내"/"내내".
-            if len(word_origin) == len(row["word_origin"].item()):  # so same length, same word.
-                file_num = file_num[idx]["file_num"].item()
-        if not isinstance(file_num, int):  # if word of same length do NOT exsit, one of most close is file_num.
+        if file_num["word_origin"].isin([word_origin]).sum() == 1:  # this case means several chars were repeating like "내"/"내내".
+            file_num = file_num[file_num["word_origin"] == word_origin]["file_num"].item()
+        else:  # if word of same length do NOT exsit, one of most close is file_num.
             file_num["len_gap"] = file_num["word_origin"].map(lambda word_r: len(word_origin)-len(word_r))
             file_num = file_num[file_num["len_gap"] == max(file_num["len_gap"])]["file_num"].item()
 
