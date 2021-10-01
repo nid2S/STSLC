@@ -14,7 +14,8 @@ class tokenizer:
         self.embedding_size = 200
         # get/make wordVocab
         with open("D:\\workspace\\Git_project\\STSLC\\tokenizer\\ko.vec", "r+", encoding="utf-8") as f:
-            self.d = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
+            self.d_kor = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
+
 
     def tokenize_kor(self, word: str) -> List[float]:
         # preprocessing file(SL video)'s word
@@ -23,16 +24,20 @@ class tokenizer:
         # get token
         result_list = []
         for char in word:
-            if char in ["", "는", "이", "가", "에게", "을", "를"] or char not in self.d:  # passing stopword, OOV
+            if char in ["", "는", "이", "가", "에게", "을", "를"] or char not in self.d_kor:  # passing stopword, OOV
                 continue
             if char in ["은", "다"] and len(result_list) > 1:  # "은", "다" have another meaning, so removed only not first.
                 continue
-            result_list.append(self.d[char])
+            result_list.append(self.d_kor[char])
         # get vectors' mean
         if len(result_list) == 0:  # case of OOV
             return [0.]*self.embedding_size
         result_list = sum(np.asarray(result_list, dtype=np.float32)) / len(result_list)
         return result_list.tolist()
+
+    def tokenize_isl(self, word: str) -> List[float]:
+        # TODO ISL
+        pass
 
 
 def get_ksl_data():
@@ -152,4 +157,5 @@ def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[List[str
     return result_sent, sents
 
 def eng_isl_preprocessing(text: str):
+    # TODO ISL
     pass

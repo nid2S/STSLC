@@ -10,7 +10,7 @@ from time import sleep
 
 
 def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
-    # TODO ISL
+    # TODO ISL check
     # get data
     data = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\"+sl_type+"_encoded_data.csv")
 
@@ -124,6 +124,7 @@ def vis_kor(sents: (List[List[List[float]]], List[List[List[str]]])):
 
 
 def vis_eng_isl(sents: List[List[List[float]]]):
+    # TODO ISL
     # each video's size is (400*300)
     pass
 

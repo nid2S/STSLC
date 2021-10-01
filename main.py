@@ -2,7 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# TODO 영상재생/사이즈 확인 | make ISL | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가)
+# TODO 영상재생/사이즈 확인 | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가)
 
 
 def check_data_exist():
@@ -75,7 +75,7 @@ class S2SL_Converter:
         #     ent.insert(0, "couldn't recognize anything.")
         #     lb.config(text="set record second(int) :")
         #     return None
-        text = "안녕? 내 이름은 니드야. 네 이름은 뭐니? 아, 몰라? 그럼 어쩔수 없지. 근데 그거 좀 많이 그렇지 않지 않지 않아?"
+        text = "this is speech to sign language converter's international sign language test sentence."
 
         # check recorded text
         tkinter.Label(win, text=check_text, font="맑은고딕 20").place(x=10, rely=0.3)
