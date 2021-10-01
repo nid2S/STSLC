@@ -66,8 +66,8 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[List[
             image = PhotoImage(fromarray(frame))
             lb.image = image
             lb.configure(image=image)
-            # TODO 깜빡임
-            waitKey(2)  # 1frame == 1ms
+            # TODO 깜빡임(영상실행 확인)
+            waitKey(2)  # 1frame == 2ms
     win.destroy()
 
 
