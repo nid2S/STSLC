@@ -1,21 +1,23 @@
-import re
-import time
-import numpy as np
-import pandas as pd
-import selenium.webdriver
+from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from urllib.request import urlretrieve
 from urllib.error import URLError
-from selenium.common.exceptions import UnexpectedAlertPresentException, NoSuchElementException
 from nltk import sent_tokenize
 from typing import List
+import selenium.webdriver
+import gensim.downloader
+import pandas as pd
+import numpy as np
+import time
+import re
 
 class tokenizer:
     def __init__(self):
-        self.embedding_size = 200
-        # get/make wordVocab
-        with open("D:\\workspace\\Git_project\\STSLC\\tokenizer\\ko.vec", "r+", encoding="utf-8") as f:
-            self.d_kor = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
-
+        self.kor_embedding_size = 200
+        self.isl_embedding_size = 300
+        f = open("D:\\workspace\\Git_project\\STSLC\\tokenizer\\ko.vec", "r+", encoding="utf-8")
+        self.d_kor = dict([(vec[0], vec.split()[1:]) for vec in f.read().split("\n")[1:] if vec != ""])
+        self.model = gensim.downloader.load("fasttext-wiki-news-subwords-300")
+        f.close()
 
     def tokenize_kor(self, word: str) -> List[float]:
         # preprocessing file(SL video)'s word
@@ -28,16 +30,30 @@ class tokenizer:
                 continue
             if char in ["은", "다"] and len(result_list) > 1:  # "은", "다" have another meaning, so removed only not first.
                 continue
-            result_list.append(self.d_kor[char])
+            try:
+                result_list.append(self.d_kor[char])
+            except KeyError:
+                continue
+
         # get vectors' mean
         if len(result_list) == 0:  # case of OOV
-            return [0.]*self.embedding_size
+            return [0.]*self.kor_embedding_size
         result_list = sum(np.asarray(result_list, dtype=np.float32)) / len(result_list)
         return result_list.tolist()
 
     def tokenize_isl(self, word: str) -> List[float]:
-        # TODO ISL
-        pass
+        word = re.sub("\W", " ", word)
+        result_list = []
+        for subword in word.split():
+            try:  # Each word in ISL having own meaning. so don't remove stop word, get every word's meaning
+                result_list.append(self.model.get_vector(subword))
+            except KeyError:
+                continue
+
+        if len(result_list) == 0:
+            return [0.]*self.isl_embedding_size
+        result_list = sum(np.asarray(result_list, dtype=np.float32)) / len(result_list)
+        return result_list.tolist()
 
 
 def get_ksl_data():
