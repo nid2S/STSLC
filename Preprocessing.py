@@ -173,5 +173,10 @@ def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[List[str
     return result_sent, sents
 
 def eng_isl_preprocessing(text: str):
-    # TODO ISL
-    pass
+    result_sent = []
+    sents = []
+    t = tokenizer()
+    for sent in sent_tokenize(text.lower()):
+        result_sent.append([t.tokenize_kor(word) for word in sent.split()])
+        sents.append([word for word in sent.split()])
+    return result_sent, sents
