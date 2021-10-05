@@ -70,7 +70,7 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]
             continue
 
         video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
-        if os.path.isfile(video_path):
+        if not os.path.exists(video_path):
             win.destroy()
             raise FileNotFoundError
         cap = VideoCapture(video_path)
