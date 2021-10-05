@@ -2,7 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-
+# TODO 실시간 번약 | 특정 버튼을 누르면 쓰레딩, 쓰레딩에서 녹음 > 바이트파일을 바로 넘겨 STT > 녹음 중지, 해당 글자로 SL출력 후 완료하면 녹음 재시작
 
 def check_data_exist():
     if not os.path.isdir("./dataset/asl_data") and os.path.isdir("./dataset/isl_data")\
