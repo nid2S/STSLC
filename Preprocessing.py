@@ -42,7 +42,7 @@ class tokenizer:
         return result_list.tolist()
 
     def tokenize_isl(self, word: str) -> List[float]:
-        word = re.sub("\W", " ", word)
+        word = re.sub("\W", " ", word).strip()
         result_list = []
         for subword in word.split():
             try:  # Each word in ISL having own meaning. so don't remove stop word, get every word's meaning
@@ -50,7 +50,7 @@ class tokenizer:
             except KeyError:
                 continue
 
-        if len(result_list) == 0:
+        if len(result_list) == 0:  # case of every word is OOV
             return [0.]*self.isl_embedding_size
         result_list = sum(np.asarray(result_list, dtype=np.float32)) / len(result_list)
         return result_list.tolist()
@@ -179,9 +179,9 @@ def eng_isl_preprocessing(text: str):
     sents = []
     t = tokenizer()
     for sent in sent_tokenize(text.lower()):
-        # TODO 문장을 나누는 방법(to accept 등)생각.
-        result_sent.append([t.tokenize_kor(word) for word in sent.split()])
-        t_sent = [word for word in sent.split()]
+        sent = re.sub("(to) (.+)", r"\1_\2", sent)
+        result_sent.append([t.tokenize_kor(word.replace("_", " ")) for word in sent.split()])
+        t_sent = [word.replace("_", " ") for word in sent.split()]
         if not t_sent == []:
             sents.append(t_sent)
     return result_sent, sents

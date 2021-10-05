@@ -1,3 +1,4 @@
+import re
 import tkinter
 import threading
 import numpy as np
@@ -17,15 +18,23 @@ def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
     data["word_encoded"] = data["word_encoded"].map(lambda w: np.asarray(w.strip("[]").split(","), dtype=np.float32))
     word = np.asarray(word, dtype=np.float32)
 
-    # if word is OOV, return -1
+    # if word is OOV(all element is 0), return -1
     if sum(word != 0) == 0:
-        return "-1"
+        # if the reason of OOV is English in KSL, return "-1"+word
+        if re.sub("[a-z]+", "", word_origin) == "" and sl_type == "ksl":
+            return "-1"+word_origin
+        else:
+            return "-1"
 
     # get cosine similarity
     data["similarity"] = data["word_encoded"].map(lambda word_vec: np.dot(word, word_vec)/(np.linalg.norm(word)*np.linalg.norm(word_vec)))
 
-    # get max similarity's file_num. if max similarity is lower than 0.7, file_num is -1.
-    file_num = data[data["similarity"] == max(data["similarity"])] if max(data["similarity"]) > 0.7 else -1
+    # get max similarity row. if max similarity is lower than 0.7, file_num is -1
+    file_num = data[data["similarity"] == max(data["similarity"])]
+    if file_num["similarity"].item() < 0.7:
+        return "-1"
+
+    # get max similarity
     try:
         file_num = file_num["file_num"].item()
     except ValueError:  # case of max similarity is exist more than two.
@@ -49,10 +58,14 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]
     lb = tkinter.Label(win)
     lb.grid()
     for file_number in file_numbers:
-        if file_number == "-1":  # No more than 0.7 similarity.
-            lb.configure(text="OOV", image=None)
-            # TODO 영어일 경우
+        if file_number[:2] == "-1":  # No more than 0.7 similarity / OOV / English
+            lb.configure(font="맑은고딕 40")
+            if file_number == "-1":  # OOV
+                lb.configure(text="OOV", image=None)
+            else:  # English in ksl
+                lb.configure(text=file_number[2:], image=None)
             sleep(0.5)
+            lb.configure(font="맑은고딕 20")
             continue
 
         video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
@@ -132,5 +145,3 @@ def vis_eng_isl(sents: (List[List[List[float]]], List[List[str]])):
     t.start()
 
     win.mainloop()
-
-

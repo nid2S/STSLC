@@ -2,7 +2,7 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# TODO 영상재생/사이즈 확인 | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가)
+# TODO 영상사이즈, 출력(프레임) 확인 | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가) / 하나씩 새로 만들어 확인
 
 
 def check_data_exist():
