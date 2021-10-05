@@ -1,5 +1,6 @@
 from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
+import threading
 import tkinter
 import os
 # TODO 실시간 번역 | 특정 버튼을 누르면 쓰레딩, 쓰레딩에서 녹음 > 바이트파일을 바로 넘겨 STT > 그냥 계속 뱐복(한번 넘어간 후에도 또 문장을 넘겼을 때 자연스러워야 함)
@@ -24,6 +25,10 @@ def switch_win(old_win: tkinter.Tk, new_win: tkinter.Tk):
     old_win.quit()
     new_win.mainloop()
 
+# TODO 시작시 버튼을 누르면 makeSTSLC win에서 언어를 전송하며 STSL를 실행(변경요망),
+#  STSL에서 STT, 없으면 에러메세지 출력, 인식된 텍스트 확인/수정 > 버튼클릭시 vis(현재 윈도우 제거 후 전처리 > vis SL)
+#  수정방안 - 일단 현재 윈도우 유지, init에 리스트를 추가해 인식된 텍스트를 저장할 수 있도록 함.
+
 
 class S2SL_Converter:
     def __init__(self):
@@ -36,9 +41,13 @@ class S2SL_Converter:
         win.option_add("*Font", "맑은고딕 20")
 
         tkinter.Label(win, text="Speech to SignLanguage", pady=10).pack(side="top")
-        tkinter.Button(win, text="eng", command=lambda: switch_win(win, self.make_S2SL_win("eng"))).pack(side="bottom", pady="7")
-        tkinter.Button(win, text="kor", command=lambda: switch_win(win, self.make_S2SL_win("kor"))).pack(side="bottom", pady="7")
-        tkinter.Button(win, text="isl", command=lambda: switch_win(win, self.make_S2SL_win("isl"))).pack(side="bottom", pady="7")
+        # tkinter.Button(win, text="eng", command=lambda: switch_win(win, self.make_S2SL_win("eng"))).pack(side="bottom", pady="7")
+        # tkinter.Button(win, text="kor", command=lambda: switch_win(win, self.make_S2SL_win("kor"))).pack(side="bottom", pady="7")
+        # tkinter.Button(win, text="isl", command=lambda: switch_win(win, self.make_S2SL_win("isl"))).pack(side="bottom", pady="7")
+
+        tkinter.Button(win, text="eng", command=lambda: switch_win(win, self.make_RT_S2SL_win("eng"))).pack(side="bottom", pady="7")
+        tkinter.Button(win, text="kor", command=lambda: switch_win(win, self.make_RT_S2SL_win("kor"))).pack(side="bottom", pady="7")
+        tkinter.Button(win, text="isl", command=lambda: switch_win(win, self.make_RT_S2SL_win("isl"))).pack(side="bottom", pady="7")
 
         return win
 
@@ -73,7 +82,6 @@ class S2SL_Converter:
             ent.insert(0, "couldn't recognize anything.")
             lb.config(text="set record second(int) :")
             return None
-        text = "this is speech to sign language converter's international sign language test sentence."
 
         # check recorded text
         tkinter.Label(win, text=check_text, font="맑은고딕 20").place(x=10, rely=0.3)
@@ -128,6 +136,83 @@ class S2SL_Converter:
         tkinter.Button(win, background="red", command=lambda: switch_win(win, self.make_mainWin()),
                        text="<-").place(relx=0.92, rely=0.02)
         tkinter.Button(win, command=lambda: self.STSL(win, ent, lb, lang), text=btn_text).place(relx=0.45, rely=0.87)
+
+        return win
+
+    def RT_STSL(self, win: tkinter.Tk, lb: tkinter.Label, ent: tkinter.Entry, lang: str):
+        # recording
+        try:
+            cycle_sec = int(ent.get())
+        except ValueError:
+            ent.delete(0, len(ent.get()))
+            if lang == "kor":
+                ent.insert(0, "정수(숫자)를 입력해 주세요 :")
+            else:
+                ent.insert(0, "PLZ put int(number) :")
+            return None
+        ent.destroy()
+        lb.config(text="변환시작")
+        lang = "ko-KR" if lang in "ko/kr/kor/korean" else "en-UR"
+
+        # TODO 이후 수정 | VIS를 따로 만들어 음성 인식과 인식된 단어를 SL변환하게 함
+        recorgnized_text = [""]
+        t = threading.Thread(target=SpeechRec.RT_STT, args=[recorgnized_text, lang, cycle_sec])
+        t.deamon = True
+        t.start()
+
+        if recorgnized_text[0] is "":  # case of recorded nothing
+            pass
+
+        # # check recorded text
+        # tkinter.Label(win, text=check_text, font="맑은고딕 20").place(x=10, rely=0.3)
+        # ent = tkinter.Entry(win, width=50, font="맑은고딕 15")
+        # ent.insert(0, text)
+        # ent.place(x=10, rely=0.4)
+        # tkinter.Button(win, text=confirm_text, font="맑은고딕 20", command=lambda: vis()).place(x=10, rely=0.5)
+        #
+        # # visualization function.
+        # def vis():
+        #     win.destroy()
+        #     win.quit()
+        #     if lang in "en/eng/english":
+        #         text_p = Preprocessing.eng_preprocessing(text)
+        #         Vis_SignLang.vis_eng(text_p)
+        #     elif lang in "ko/kr/kor/korean":
+        #         text_p = Preprocessing.kor_preprocessing(text)
+        #         Vis_SignLang.vis_kor(text_p)
+        #     elif lang in "int/isl/eng_isl/international":
+        #         text_p = Preprocessing.eng_isl_preprocessing(text)
+        #         Vis_SignLang.vis_eng_isl(text_p)
+        #     self.make_mainWin().mainloop()
+
+    def make_RT_S2SL_win(self, lang: str):
+        if lang in "ko/kr/kor/korean":
+            title = "kor S2SL"
+            lb_text = "변환할 주기(몇 초 단위로 음성을 감지할지) 입력 :"
+            btn_text = "변환시작"
+        else:
+            title = "eng/isl S2SL"
+            lb_text = "set second of record cycle :"
+            btn_text = "start convert"
+
+        win = tkinter.Tk()
+        win.title(title)
+        win.geometry("800x450+100+50")
+        win.option_add("*Font", "맑은고딕 20")
+
+        lb = tkinter.Label(win, text=lb_text)
+        lb.grid(row=0, column=0, padx="10", pady="12")
+        ent = tkinter.Entry(win, font="맑은고딕 15", width="30")
+        ent.grid(row=1, column=0, pady="12")
+
+        win = tkinter.Tk()
+        win.title(title)
+        win.geometry("800x450+100+50")
+        win.option_add("*Font", "맑은고딕 20")
+
+        tkinter.Button(win, background="red", command=lambda: switch_win(win, self.make_mainWin()),
+                       text="<-").place(relx=0.92, rely=0.02)
+        tkinter.Button(win, command=lambda: self.RT_STSL(win, lb, ent, lang), text=btn_text).place(relx=0.45, rely=0.87)
 
         return win
 
