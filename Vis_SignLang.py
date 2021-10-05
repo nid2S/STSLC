@@ -10,7 +10,6 @@ from time import sleep
 
 
 def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
-    # TODO ISL check
     # get data
     data = pd.read_csv("D:\\workspace\\Git_project\\STSLC\\dataset\\"+sl_type+"_encoded_data.csv")
 
@@ -30,7 +29,7 @@ def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
     try:
         file_num = file_num["file_num"].item()
     except ValueError:  # case of max similarity is exist more than two.
-        if file_num["word_origin"].isin([word_origin]).sum() == 1:  # this case means several chars were repeating like "내"/"내내".
+        if file_num["word_origin"].isin([word_origin]).sum() == 1:  # this case means several chars were repeating like "내"/"내내". | isl dont be same.
             file_num = file_num[file_num["word_origin"] == word_origin]["file_num"].item()
         else:  # if same word do NOT exsit, one of most close is file_num.
             file_num["len_gap"] = file_num["word_origin"].map(lambda word_r: len(word_origin)-len(word_r))
@@ -39,7 +38,7 @@ def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
     print("get one file_num : " + str(file_num))
     return str(file_num)
 
-def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[List[str]]]), win: tkinter.Tk):
+def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]), win: tkinter.Tk):
     """sl_type : ksl or isl"""
     # get file numbers
     file_numbers = []
@@ -66,7 +65,7 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[List[
             image = PhotoImage(fromarray(frame))
             lb.image = image
             lb.configure(image=image)
-            # TODO 깜빡임(영상실행 확인)
+            # TODO 영상실행 확인
             waitKey(2)  # 1frame == 2ms
     win.destroy()
 
@@ -110,11 +109,11 @@ def vis_eng(sents: List[List[List[str]]]):
         win.mainloop()
 
 
-def vis_kor(sents: (List[List[List[float]]], List[List[List[str]]])):
+def vis_kor(sents: (List[List[List[float]]], List[List[str]])):
     # sents > sent > word(token_vec)
     win = tkinter.Tk()
     win.title("Korean Speak to SighLanguage")
-    win.geometry("800x450+100+50")  # each video's size is (700*466)
+    win.geometry("710x480+100+50")  # each video's size is (700*466)
 
     t = threading.Thread(target=video_running, args=["ksl", sents, win])
     t.deamon = True
@@ -123,9 +122,15 @@ def vis_kor(sents: (List[List[List[float]]], List[List[List[str]]])):
     win.mainloop()
 
 
-def vis_eng_isl(sents: List[List[List[float]]]):
-    # TODO ISL
-    # each video's size is (400*300)
-    pass
+def vis_eng_isl(sents: (List[List[List[float]]], List[List[str]])):
+    win = tkinter.Tk()
+    win.title("international Speak to SighLanguage")
+    win.geometry("410x310+100+50")  # each video's size is (400*300)
+
+    t = threading.Thread(target=video_running, args=["isl", sents, win])
+    t.deamon = True
+    t.start()
+
+    win.mainloop()
 
 

@@ -160,7 +160,7 @@ def eng_preprocessing(text: str):
         result_sent.append([[char for char in word] for word in sent_sr.values])
     return result_sent
 
-def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[List[str]]]):
+def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[str]]):
     # sents > sent > word(token_vec)
     # lower, remove other char, tokenize/stemming/normalize
     result_sent = []
@@ -169,7 +169,9 @@ def kor_preprocessing(text: str) -> (List[List[List[float]]], List[List[List[str
     for sent in sent_tokenize(text.lower()):
         sent = re.sub(r"[^ㄱ-ㅎㅏ-ㅣ가-힣a-z0-1 ]", r"", sent)
         result_sent.append([t.tokenize_kor(word) for word in sent.split()])
-        sents.append([word for word in sent.split()])
+        t_sent = [word for word in sent.split()]
+        if not t_sent == []:
+            sents.append(t_sent)
     return result_sent, sents
 
 def eng_isl_preprocessing(text: str):
@@ -177,6 +179,9 @@ def eng_isl_preprocessing(text: str):
     sents = []
     t = tokenizer()
     for sent in sent_tokenize(text.lower()):
+        # TODO 문장을 나누는 방법(to accept 등)생각.
         result_sent.append([t.tokenize_kor(word) for word in sent.split()])
-        sents.append([word for word in sent.split()])
+        t_sent = [word for word in sent.split()]
+        if not t_sent == []:
+            sents.append(t_sent)
     return result_sent, sents
