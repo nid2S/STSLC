@@ -1,3 +1,4 @@
+import os
 import re
 import tkinter
 import threading
@@ -69,6 +70,9 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]
             continue
 
         video_path = "./dataset/"+sl_type+"_data/" + file_number + ".mp4"
+        if os.path.isfile(video_path):
+            win.destroy()
+            raise FileNotFoundError
         cap = VideoCapture(video_path)
         while True:
             ret, frame = cap.read()
@@ -78,8 +82,7 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]
             image = PhotoImage(fromarray(frame))
             lb.image = image
             lb.configure(image=image)
-            # TODO 영상실행 확인
-            waitKey(2)  # 1frame == 2ms
+            waitKey(2)  # Blinking can't be took action.
     win.destroy()
 
 

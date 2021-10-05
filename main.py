@@ -2,7 +2,6 @@ from STSLC import SpeechRec, Preprocessing, Vis_SignLang
 from nltk import download, sent_tokenize
 import tkinter
 import os
-# TODO 영상사이즈, 출력(프레임) 확인 | 음성인식 확인(숫자도 나온다면 숫자에 대한 대응을 추가) / 하나씩 새로 만들어 확인
 
 
 def check_data_exist():
@@ -63,18 +62,17 @@ class S2SL_Converter:
             ent.delete(0, len(ent.get()))
             ent.insert(0, error_text)
             return None
-        # TODO 임시로 입력을 고정함
-        # # recording
-        # lb.config(text=recording_text)
-        # if lang in "ko/kr/kor/korean":
-        #     text = SpeechRec.STT(rec_sec, "ko-KR")
-        # else:
-        #     text = SpeechRec.STT(rec_sec, "en-UR")
-        # if text is None:  # case of recorded nothing
-        #     ent.delete(0, len(ent.get()))
-        #     ent.insert(0, "couldn't recognize anything.")
-        #     lb.config(text="set record second(int) :")
-        #     return None
+        # recording
+        lb.config(text=recording_text)
+        if lang in "ko/kr/kor/korean":
+            text = SpeechRec.STT(rec_sec, "ko-KR")
+        else:
+            text = SpeechRec.STT(rec_sec, "en-UR")
+        if text is None:  # case of recorded nothing
+            ent.delete(0, len(ent.get()))
+            ent.insert(0, "couldn't recognize anything.")
+            lb.config(text="set record second(int) :")
+            return None
         text = "this is speech to sign language converter's international sign language test sentence."
 
         # check recorded text
