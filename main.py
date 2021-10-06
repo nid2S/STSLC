@@ -3,7 +3,7 @@ from nltk import download, sent_tokenize
 import threading
 import tkinter
 import os
-# TODO 실시간 번역 | 특정 버튼을 누르면 쓰레딩, 쓰레딩에서 녹음 > 바이트파일을 바로 넘겨 STT > 그냥 계속 뱐복(한번 넘어간 후에도 또 문장을 넘겼을 때 자연스러워야 함)
+
 
 def check_data_exist():
     if not os.path.isdir("./dataset/asl_data") and os.path.isdir("./dataset/isl_data")\
@@ -24,11 +24,6 @@ def switch_win(old_win: tkinter.Tk, new_win: tkinter.Tk):
     old_win.destroy()
     old_win.quit()
     new_win.mainloop()
-
-# TODO 시작시 버튼을 누르면 makeSTSLC win에서 언어를 전송하며 STSL를 실행(변경요망),
-#  STSL에서 STT, 없으면 에러메세지 출력, 인식된 텍스트 확인/수정 > 버튼클릭시 vis(현재 윈도우 제거 후 전처리 > vis SL)
-#  수정방안 - 일단 현재 윈도우 유지, init에 리스트를 추가해 인식된 텍스트를 저장할 수 있도록 함.
-
 
 class S2SL_Converter:
     def __init__(self):
@@ -154,36 +149,43 @@ class S2SL_Converter:
         lb.config(text="변환시작")
         lang = "ko-KR" if lang in "ko/kr/kor/korean" else "en-UR"
 
-        # TODO 이후 수정 | VIS를 따로 만들어 음성 인식과 인식된 단어를 SL변환하게 함
+        t = threading.Thread(target=self.RT_Convert, args=[win, lang, cycle_sec])
+        t.deamon = True
+        t.start()
+
+    def RT_Convert(self, win: tkinter.Tk, lang: str, cycle_sec: int):
         recorgnized_text = [""]
+        announ_text = "인식된 텍스트 : " if lang == "ko-KR" else "recognized text : "
+
+        lb = tkinter.Label(win)
+        lb.grid(row=1, column=0, pady="12")
+
         t = threading.Thread(target=SpeechRec.RT_STT, args=[recorgnized_text, lang, cycle_sec])
         t.deamon = True
         t.start()
 
-        if recorgnized_text[0] is "":  # case of recorded nothing
-            pass
+        while True:
+            if recorgnized_text[0] is "":  # case of recorded nothing
+                lb.config(text="")
+                continue
 
-        # # check recorded text
-        # tkinter.Label(win, text=check_text, font="맑은고딕 20").place(x=10, rely=0.3)
-        # ent = tkinter.Entry(win, width=50, font="맑은고딕 15")
-        # ent.insert(0, text)
-        # ent.place(x=10, rely=0.4)
-        # tkinter.Button(win, text=confirm_text, font="맑은고딕 20", command=lambda: vis()).place(x=10, rely=0.5)
-        #
-        # # visualization function.
-        # def vis():
-        #     win.destroy()
-        #     win.quit()
-        #     if lang in "en/eng/english":
-        #         text_p = Preprocessing.eng_preprocessing(text)
-        #         Vis_SignLang.vis_eng(text_p)
-        #     elif lang in "ko/kr/kor/korean":
-        #         text_p = Preprocessing.kor_preprocessing(text)
-        #         Vis_SignLang.vis_kor(text_p)
-        #     elif lang in "int/isl/eng_isl/international":
-        #         text_p = Preprocessing.eng_isl_preprocessing(text)
-        #         Vis_SignLang.vis_eng_isl(text_p)
-        #     self.make_mainWin().mainloop()
+            lb.config(text=announ_text + recorgnized_text[0])
+
+            # TODO 원래는 현재 창 destory > VIS > make_mainWin.mainloop() == VIS에서 창 생성 후 종료
+            #  1. 아직 원래의 문장의 변환이 끝나지 않은 상태에서 새 문장이 들어왔을때 여러 창이 띄워지는게 아닌 창이 이어지게 하면 좋을듯
+            #  2. asl에서 threading읋 이용해 자동으로 넘어가게 함.
+
+            if lang in "en/eng/english":
+                text_p = Preprocessing.eng_preprocessing(recorgnized_text[0])
+                Vis_SignLang.vis_eng(text_p)
+            elif lang in "ko/kr/kor/korean":
+                text_p = Preprocessing.kor_preprocessing(recorgnized_text[0])
+                Vis_SignLang.vis_kor(text_p)
+            elif lang in "int/isl/eng_isl/international":
+                text_p = Preprocessing.eng_isl_preprocessing(recorgnized_text[0])
+                Vis_SignLang.vis_eng_isl(text_p)
+
+            recorgnized_text[0] = ""
 
     def make_RT_S2SL_win(self, lang: str):
         if lang in "ko/kr/kor/korean":
