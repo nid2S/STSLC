@@ -171,10 +171,6 @@ class S2SL_Converter:
 
             lb.config(text=announ_text + recorgnized_text[0])
 
-            # TODO 원래는 현재 창 destory > VIS > make_mainWin.mainloop() == VIS에서 창 생성 후 종료
-            #  1. 아직 원래의 문장의 변환이 끝나지 않은 상태에서 새 문장이 들어왔을때 여러 창이 띄워지는게 아닌 창이 이어지게 하면 좋을듯
-            #  2. asl에서 threading읋 이용해 자동으로 넘어가게 함.
-
             if lang in "en/eng/english":
                 text_p = Preprocessing.eng_preprocessing(recorgnized_text[0])
                 Vis_SignLang.vis_eng(text_p)

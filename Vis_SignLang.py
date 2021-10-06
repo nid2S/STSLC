@@ -10,6 +10,8 @@ from PIL.ImageTk import PhotoImage
 from typing import List
 from time import sleep
 
+global is_converting
+is_converting = False
 
 def get_most_similar(word: List[float], word_origin: str, sl_type: str) -> str:
     # get data
@@ -88,8 +90,18 @@ def video_running(sl_type: str, sents: (List[List[List[float]]], List[List[str]]
 
 def vis_eng(sents: List[List[List[str]]]):
     # sent > word > char
+    global is_converting
+    while is_converting:
+        continue
+    is_converting = True
 
-    # tkinter
+    def auto_run(win_t: tkinter.Tk):
+        sleep(4)
+        try:
+            win_t.destroy()
+        except tkinter.TclError:
+            pass
+
     for sent in sents:
         win = tkinter.Tk()
         # each picture's size is about (60*110)
@@ -122,11 +134,23 @@ def vis_eng(sents: List[List[List[str]]]):
 
         tkinter.Button(win, command=lambda: win.destroy(), text="->", font="맑은고딕 20").place(relx=0.45, rely=0.87)
         win.title(sent_comp)
+
+        t = threading.Thread(target=auto_run, args=[win])
+        t.daemon = True
+        t.start()
+
         win.mainloop()
+
+    is_converting = False
 
 
 def vis_kor(sents: (List[List[List[float]]], List[List[str]])):
     # sents > sent > word(token_vec)
+    global is_converting
+    while is_converting:
+        continue
+    is_converting = True
+
     win = tkinter.Tk()
     win.title("Korean Speak to SighLanguage")
     win.geometry("710x480+100+50")  # each video's size is (700*466)
@@ -136,9 +160,14 @@ def vis_kor(sents: (List[List[List[float]]], List[List[str]])):
     t.start()
 
     win.mainloop()
-
+    is_converting = False
 
 def vis_eng_isl(sents: (List[List[List[float]]], List[List[str]])):
+    global is_converting
+    while is_converting:
+        continue
+    is_converting = True
+
     win = tkinter.Tk()
     win.title("international Speak to SighLanguage")
     win.geometry("410x310+100+50")  # each video's size is (400*300)
@@ -148,3 +177,5 @@ def vis_eng_isl(sents: (List[List[List[float]]], List[List[str]])):
     t.start()
 
     win.mainloop()
+
+    is_converting = False
