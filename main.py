@@ -203,7 +203,6 @@ class S2SL_Converter:
         ent = tkinter.Entry(win, font="맑은고딕 15", width="30")
         ent.grid(row=1, column=0, pady="12")
 
-        win = tkinter.Tk()
         win.title(title)
         win.geometry("800x450+100+50")
         win.option_add("*Font", "맑은고딕 20")
@@ -216,5 +215,5 @@ class S2SL_Converter:
 
 
 if __name__ == '__main__':
-    check_data_exist()
+    # check_data_exist()
     stslc = S2SL_Converter()
